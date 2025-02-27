@@ -1,21 +1,7 @@
-import sys
-import pynput
-from pynput import keyboard
-import time
-import os
-import snake 
-from threading import Lock as lock
-from playsound3 import playsound
+from options import *
+import snake
 
-HOME = '\x1B[H'
-HIDECURSOR = '\x1B[?25l'
-ERASE = '\x1B[1J'
-MARK = '\x1B[7m'
-CURSOR_DOWN = '\x1B[1B'
-CURSOR_RIGHT = '\x1B[1C'
-RESET = '\x1B[0m'
 
-MUSIC ="./sound/music.mp3"
 
 sys.stdout.write(ERASE + HOME +HIDECURSOR)
 w,h = os.get_terminal_size()
@@ -88,13 +74,14 @@ def exit():
 
     global on
     on = False
+    
 commands = [start,exit]
 # The event listener will be running in this block
 
 with keyboard.Events() as events:
-    musicThread = playsound(MUSIC,False,daemon=False)
+    #musicThread = playsound(MUSIC,False,daemon=True)
     for event in events:
-        if isinstance(event,pynput.keyboard.Events.Press):
+        if isinstance(event,keyboard.Events.Press):
             if event and event.key == keyboard.Key.esc:
                 sys.stdin.flush()
                 break
