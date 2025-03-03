@@ -25,10 +25,10 @@ class menu:
         self.soundeffect = False
         self.map= Map(w=80,h=20,x=self.w//2-40,y=self.h//2-10)
         self.size = ((self.w - max(map(len,self.actionNames)))//2,(self.h-len(self.actions))//2)
-        self.updateDisplay()
+        
 
     def pressHandler(self,key):
-        match str(key).replace("'",""):
+        match key:
             case Controls.DOWN:
                 self.position += 1
                 self.position %= len(self.actionNames)
@@ -47,7 +47,7 @@ class menu:
     def markActiveAction(self):
         
         a = list(map(lambda x: x+" on" if x=="Music" and self.music or x=="Sound" and self.soundeffect else (x+" off" if x=="Music" or x=="Sound" else x),self.actionNames))
-        a[self.position] = BLINK+MARK+a[self.position]+RESET+HIDECURSOR
+        a[self.position] = MARK+a[self.position]+RESET+HIDECURSOR
         return a
         
 
@@ -76,8 +76,8 @@ class menu:
     def start(self):
         if not self.running:
             self.running = True
-            game = snake.snake()
-            (win,score) = game.newGame(w=80,h=20,x=w//2-40,y=h//2-10)
+            game = snake.snake(audio=self.soundeffect,music=self.music)
+            (win,score) = game.newGame(self.map.w,self.map.h,self.map.x,self.map.y)
             self.running = self.afterGame(win,score)
 
     def exit(self):
@@ -93,22 +93,19 @@ class menu:
 
     
     def main(self):
+        self.musicThread = None
+        self.updateDisplay()
+        while self.on:
+            if self.music :
+                if self.musicThread and not self.musicThread.is_alive():
+                    self.musicThread = playsound(MUSIC,False,daemon=True)
+            while kb.kbhit(): 
+                hit = kb.getch()
+                self.pressHandler(hit.decode(errors="ignore"))
+                if not self.on:
+                    break
 
         
-        
-        with keyboard.Events() as events:
-        #musicThread = playsound(MUSIC,False,daemon=True)
-            for event in events:
-                    if isinstance(event,keyboard.Events.Press):
-                        if event and event.key == keyboard.Key.esc:
-                            self.cleanup()
-                            sys.stdin.flush()
-                            break
-                    else:
-                        self.pressHandler(event.key)
-                        events = []
-                        if not self.on:
-                            break
 
         self.cleanup()
         sys.stdin.flush()

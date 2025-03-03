@@ -37,28 +37,40 @@ class snake:
     def __init__(self,audio=True,music=False):
         self.speed = VELOCITY/FPS
         self.score=0
+        self.audio = audio
+        self.music = music
         self.mv = mv
         self.running = True
-        self.listener = keyboard.Listener(on_press=self.pressHandler, on_release=None)
-        self.listener.start()
+        self.keystrokeThread = Thread(target=self.keylistenerMain,daemon=True)
+        # self.listener = keyboard.Listener(on_press=self.pressHandler, on_release=None)
+        # self.listener.start()
+
         if audio:
             self.sound = self.soundEffect
         else:
-            self.sound = None
-        
+            self.sound = lambda x: x
 
+        
+    def keylistenerMain(self):
+        while self.running:
+            while kb.kbhit(): 
+                hit = kb.getch()
+                self.pressHandler(hit.decode(errors="ignore"))
+                if not self.running:
+                    break
+            time.sleep(0.01)
 
     def pressHandler(self,key):
-        match str(key):
-            case "'w'": 
+        match str(key).replace("'",""):
+            case Controls.UP: 
                 self.mv = moves[CURSOR_UP]
-            case "'s'":
+            case Controls.DOWN:
                 self.mv = moves[CURSOR_DOWN]
-            case "'a'":
+            case Controls.LEFT:
                 self.mv = moves[CURSOR_LEFT]
-            case "'d'":
+            case Controls.RIGHT:
                 self.mv = moves[CURSOR_RIGHT]
-            case "'l'":
+            case Controls.SUBMIT:
                 self.running = False
             case default:
                 pass
@@ -160,13 +172,13 @@ class snake:
     sys.stdout.write(ERASE + HOME)
 
     def newGame(self,w=RIGHT_BOUND-LEFT_BOUND,h=LOWER_BOUND-UPPER_BOUND,x=LEFT_BOUND,y=UPPER_BOUND):
-
         sys.stdout.write(ERASE)
         self.drawBorders(x=x,y=y,width=w,height=h)
         sys.stdout.write(HOME)
         Orbs = self.generateOrbs(10,x,x+w,y,y+h)
         self.drawAt(Orbs,FOOD)
 
+        self.keystrokeThread.start()
         positionX = (w//2+x)
         positionY = (h//2+y)
         position = {'x':positionX,'y': positionY}
@@ -217,7 +229,10 @@ class snake:
             sys.stdout.write('\x1B[K')
             sys.stdout.write(HOME)
         sys.stdout.write(ERASE + HOME)
-        return (self.running,self.score)
+        win = self.running
+        self.running = False
+        self.keystrokeThread.join()
+        return (win,self.score)
 
 
         
