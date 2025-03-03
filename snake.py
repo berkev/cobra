@@ -131,7 +131,8 @@ class snake:
         return Orbs
 
     def soundEffect(self,path):
-        playsound(path,block=False)
+        if path:
+            playsound(path,block=False)
 
     def moveHead(self,size,path):
         if size>len(path):

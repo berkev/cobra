@@ -97,7 +97,7 @@ class menu:
         self.updateDisplay()
         while self.on:
             if self.music :
-                if self.musicThread and not self.musicThread.is_alive():
+                if self.musicThread and not self.musicThread.is_alive() and MUSIC:
                     self.musicThread = playsound(MUSIC,False,daemon=True)
             while kb.kbhit(): 
                 hit = kb.getch()

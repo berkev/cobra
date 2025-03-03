@@ -14,6 +14,11 @@ GAMEOVER = "./sound/gameover.mp3"
 EAT = "./sound/eat.mp3"
 MUSIC ="./sound/music.mp3"
 
+SOUNDS = [GAMEOVER,EAT,MUSIC]
+for sound in SOUNDS:
+    if not os.path.exists(sound):
+        sound = None
+
 
 #Cursor
 RESET = '\x1B[0m'
